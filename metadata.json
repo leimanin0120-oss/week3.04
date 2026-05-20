@@ -1,0 +1,5 @@
+{
+  "name": "Campus Food Rating",
+  "description": "A real-time campus food review and rating system with anonymous submissions and category filtering.",
+  "requestFramePermissions": []
+}

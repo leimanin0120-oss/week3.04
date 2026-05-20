@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: reviews
+    // Document ID: auto-generated
+    // Fields:
+    //   - content: string (required, 1-1000 chars)
+    //   - category: string (required, enum)
+    //   - rating: number (required, 1-5)
+    //   - votes: number (required, >= 0)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['content', 'category', 'rating', 'votes', 'createdAt', 'status']) &&
+             data.content is string && data.content.size() >= 1 && data.content.size() <= 1000 &&
+             data.category in ['早餐', '午餐', '下午茶', '晚餐', '其他'] &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             data.votes is number && data.votes >= 0 &&
+             data.createdAt is timestamp &&
+             data.status in ['active', 'done'] &&
+             (!('imageUrl' in data) || data.imageUrl == null || (data.imageUrl is string && data.imageUrl.size() < 2000));
+    }
+
+    match /reviews/{reviewId} {
+      // Anyone can read reviews
+      allow read: if true;
+      
+      // Anyone can create valid reviews
+      allow create: if isValidReview(request.resource.data);
+      
+      // Anyone can update votes or status
+      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']) &&
+                        request.resource.data.votes == resource.data.votes + 1) ||
+                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+                        request.resource.data.status in ['active', 'done']);
+      
+      // No deletion allowed for now
+      allow delete: if false;
+    }
+  }
+}

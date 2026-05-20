@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "Review": {
+      "title": "Review",
+      "description": "A campus food review submitted by a user.",
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "The text content of the review."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["早餐", "午餐", "下午茶", "晚餐", "其他"],
+          "description": "The category of the food or meal."
+        },
+        "rating": {
+          "type": "number",
+          "description": "Rating from 1 to 5."
+        },
+        "votes": {
+          "type": "number",
+          "description": "Number of +1 votes."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the review was created."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "done"],
+          "description": "The completion status of the entry."
+        }
+      },
+      "required": ["content", "category", "rating", "votes", "createdAt", "status"]
+    }
+  },
+  "firestore": {
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Collection of food reviews."
+    }
+  }
+}
